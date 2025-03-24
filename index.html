@@ -44,7 +44,7 @@
             cursors
 
         let isFlipping = false;
-        let emmiter, particles;
+        let emmiter, particles; // 全域變數
 
         function preload() {
             // 練習先前學過的經驗，將background.png、platform.png、ice-platform.png、dude.png資料匯入
@@ -70,6 +70,12 @@
                 .setCollideWorldBounds(true)
                 .setName("dude");
 
+
+            platforms = this.physics.add.group({
+                immovable: true,
+                allowGravity: false,
+                velocityX: 100,
+            });
 
 
 
@@ -102,7 +108,6 @@
 
 
 
-            // 建立粒子效果 only for v3.55.2
             emitter = this.add.particles(0, 0, 'red', {
                 x: player.x,
                 y: player.y + player.displayHeight / 2, // 讓粒子從玩家腳底出現
@@ -116,7 +121,6 @@
             });
 
 
-            
 
 
         }
@@ -160,7 +164,12 @@
                 });
             }
 
-            
+
+
+
+
+
+
 
         }
     </script>
