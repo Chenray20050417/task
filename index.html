@@ -44,7 +44,7 @@
             cursors
 
         let isFlipping = false;
-        let emmiter, particles; // 全域變數
+        let emitter, particles; // 全域變數
 
         function preload() {
             // 練習先前學過的經驗，將background.png、platform.png、ice-platform.png、dude.png資料匯入
@@ -78,9 +78,9 @@
             });
 
             platforms.create(0, 64, 'ice-platform');
-platforms.create(200, 180, 'platform');
-platforms.create(400, 296, 'ice-platform');
-platforms.create(600, 412, "platform")
+            platforms.create(200, 180, 'platform');
+            platforms.create(400, 296, 'ice-platform');
+            platforms.create(600, 412, "platform")
 
 
 
@@ -113,17 +113,19 @@ platforms.create(600, 412, "platform")
 
 
 
-            emitter = this.add.particles(0, 0, 'red', {
+            particles = this.add.particles('red');
+            emitter = particles.createEmitter({
                 x: player.x,
                 y: player.y + player.displayHeight / 2, // 讓粒子從玩家腳底出現
                 speed: { min: -100, max: 100 },
                 scale: { start: 0.1, end: 0 }, // 逐漸縮小
-                lifespan: 400,
+                lifespan: 200,
                 quantity: 10, // 一次噴發 10 顆粒子
                 blendMode: 'ADD',
-                // on: false // 預設不啟動發射粒子特效
-                active: false
+                on: false // 預設不啟動發射粒子特效
             });
+            // 讓粒子特效跟隨玩家，並設定位置有半個身高的偏移量在玩家腳底
+            emitter.startFollow(player, 0, player.displayHeight / 2);
 
 
 
@@ -133,17 +135,17 @@ platforms.create(600, 412, "platform")
         function update() {
 
             player.setVelocityX(0);
-            let isTouch = player.body.blocked.down || player.body.touching.down; if (cursors.left.isDown) {
+            let isTouch = player.body.blocked.down || player.body.touching.down;
+            if (cursors.left.isDown) {
                 player.setVelocityX(-200);
-                player.anims.play('left', true);
+                player.anims.play("left", true);
             } else if (cursors.right.isDown) {
                 player.setVelocityX(200);
-                player.anims.play('right', true);
+                player.anims.play("right", true);
             } else {
                 player.setVelocityX(0);
-                player.anims.play('turn');
+                player.anims.play("turn");
             }
-
             if (cursors.up.isDown && isTouch) {
                 player.setVelocityY(-500);
             }
@@ -151,23 +153,26 @@ platforms.create(600, 412, "platform")
 
 
 
+            // 增加判斷是否翻轉中
             if (cursors.up.isDown && isTouch && !isFlipping) {
                 isFlipping = true;
                 player.setVelocityY(-500);
-
-                let flipDirection = player.anims.currentAnim.key === 'left' ? -360 : 360;
-
+                // 使用粒子特效
+                emitter.start();
+                // 使用tweens補間動畫設計翻轉效果
                 this.tweens.add({
                     targets: player,
-                    angle: flipDirection,
-                    duration: 600,
-                    ease: 'Cubic.easeOut',
-                    onComplete: () => {
-                        player.setAngle(0);
-                        isFlipping = false;
+                    angle: cursors.right.isDown ? 360 : -360, // 判斷左右鍵
+                    duration: 600, // 翻轉時間設定為0.6 秒
+                    ease: 'Cubic.easeOut', // 使用easeOut速率曲線
+                    onComplete: () => { // 翻轉完成後執行
+                        player.setAngle(0); // 回復原本玩家角度
+                        isFlipping = false; // 重置翻轉狀態
+                        emitter.stop(); // 停止粒子特效
                     }
                 });
             }
+
 
 
 
